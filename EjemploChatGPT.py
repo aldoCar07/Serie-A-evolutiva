@@ -11,15 +11,6 @@ import math
 # Cargar datos de estadios y equipos desde el archivo CSV
 estadios_df = pd.read_csv("estadios.csv")
 
-# Inicialización de la población
-def inicializar_poblacion(num_calendarios):
-    poblacion = []
-    for _ in range(num_calendarios):
-        # Genera un calendario aleatorio
-        calendario = generar_calendario_aleatorio()
-        poblacion.append(calendario)
-    return poblacion
-
 # Función para calcular la distancia entre dos estadios (puedes usar la distancia Euclidiana)
 def calcular_distancia(equipo1, equipo2):
     radio_tierra_km = 6371.0
@@ -43,6 +34,20 @@ def calcular_distancia(equipo1, equipo2):
 
     return distancia
 
+# Inicialización de la población
+def inicializar_poblacion(num_calendarios):
+    poblacion = []
+    for _ in range(num_calendarios):
+        # Genera un calendario aleatorio
+        calendario = generar_calendario_aleatorio()
+        poblacion.append(calendario)
+    return poblacion
+
+# Generar un calendario de partidos aleatorio
+def generar_calendario_aleatorio():
+    # Implementa la lógica para generar un calendario aleatorio
+    pass
+
 # Define una función de aptitud para evaluar los calendarios
 def evaluar_calendario(calendario):
     # Implementa la función de evaluación para evaluar el calendario de partidos
@@ -56,11 +61,6 @@ def cruzar_calendarios(calendario1, calendario2):
 # Definir una función para mutar un calendario
 def mutar_calendario(calendario):
     # Implementa la lógica de mutación en un calendario
-    pass
-
-# Generar un calendario de partidos aleatorio
-def generar_calendario_aleatorio():
-    # Implementa la lógica para generar un calendario aleatorio
     pass
 
 # Algoritmo evolutivo

@@ -6,17 +6,42 @@ Title: Serie A calendario
 """
 import pandas as pd
 import random
+import math
 
-# Cargar datos de estadios desde el archivo CSV
+# Cargar datos de estadios y equipos desde el archivo CSV
 estadios_df = pd.read_csv("estadios.csv")
 
-# Cargar equipos desde el archivo CSV
-equipos_df = pd.read_csv("equipos.csv")
+# Inicialización de la población
+def inicializar_poblacion(num_calendarios):
+    poblacion = []
+    for _ in range(num_calendarios):
+        # Genera un calendario aleatorio
+        calendario = generar_calendario_aleatorio()
+        poblacion.append(calendario)
+    return poblacion
 
-# Definir una función para calcular la distancia entre dos estadios (puedes usar la distancia Euclidiana)
-def calcular_distancia(estadio1, estadio2):
-    # Implementa tu lógica para calcular la distancia entre estadios
-    pass
+# Función para calcular la distancia entre dos estadios (puedes usar la distancia Euclidiana)
+def calcular_distancia(equipo1, equipo2):
+    radio_tierra_km = 6371.0
+    # Convertir latitudes y longitudes de grados a radianes
+    #falta referenciar por equipo
+    latitud1 = math.radians(latitud1)
+    longitud1 = math.radians(longitud1)
+    latitud2 = math.radians(latitud2)
+    longitud2 = math.radians(longitud2)
+    
+    # Diferencia entre las latitudes y longitudes
+    diferencia_latitud = latitud2 - latitud1
+    diferencia_longitud = longitud2 - longitud1
+
+    # Fórmula de la distancia haversine
+    a = math.sin(diferencia_latitud / 2)**2 + math.cos(latitud1) * math.cos(latitud2) * math.sin(diferencia_longitud / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+    # Calcular la distancia
+    distancia = radio_tierra_km * c
+
+    return distancia
 
 # Define una función de aptitud para evaluar los calendarios
 def evaluar_calendario(calendario):
@@ -32,15 +57,6 @@ def cruzar_calendarios(calendario1, calendario2):
 def mutar_calendario(calendario):
     # Implementa la lógica de mutación en un calendario
     pass
-
-# Inicialización de la población
-def inicializar_poblacion(num_calendarios):
-    poblacion = []
-    for _ in range(num_calendarios):
-        # Genera un calendario aleatorio
-        calendario = generar_calendario_aleatorio()
-        poblacion.append(calendario)
-    return poblacion
 
 # Generar un calendario de partidos aleatorio
 def generar_calendario_aleatorio():

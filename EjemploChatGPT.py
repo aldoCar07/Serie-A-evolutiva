@@ -16,6 +16,9 @@ def calcular_distancia(equipo1, equipo2):
     radio_tierra_km = 6371.0
     # Convertir latitudes y longitudes de grados a radianes
     #falta referenciar por equipo
+    latitud1, longitud1= estadios_df[estadios_df['Team'] == equipo1][['Latitude', 'Longitude']].values[0]
+    latitud2, longitud2= estadios_df[estadios_df['Team'] == equipo2][['Latitude', 'Longitude']].values[0]
+    
     latitud1 = math.radians(latitud1)
     longitud1 = math.radians(longitud1)
     latitud2 = math.radians(latitud2)
@@ -51,6 +54,19 @@ def generar_calendario_aleatorio():
 # Define una función de aptitud para evaluar los calendarios
 def evaluar_calendario(calendario):
     # Implementa la función de evaluación para evaluar el calendario de partidos
+    # Vamos a evaluar de forma negativa si hay dos partidos en la misma ciudad en la misma jornada
+    for jornada in calendario:  #para cada jornada del calendario se hará la evaluación
+        ciudades = [] #agregamos las ciudades en las que se juegan los partidos de la jornada (al final debería haber 10 distintos)
+        for partido in jornada['partidos']:
+            ciudad_del_estadio = (estadios_df[estadios_df['Stadium'] == partido[2]]).head(1)['City'].values[1] #chorizo para sacar el string de la ciudad en la que se juega un partido de la jornada
+            if(ciudad_del_estadio in ciudades): # si la ciudad ya está agregada, habrá al menos dos partidos en la misma ciudad, así que evaluamos con -1
+                return -1
+            else:
+                ciudades.append(ciudad_del_estadio)
+                
+    # El siguiente criterio de evaluación es la distancia que hay entre estadios.
+    # Procuraremos que la distancia recorrida de los equipos por jornada sea lo más equitativa posible.
+    
     pass
 
 # Función para cruzar dos calendarios

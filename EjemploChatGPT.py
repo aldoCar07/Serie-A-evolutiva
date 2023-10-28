@@ -53,15 +53,36 @@ def evaluar_calendario(calendario):
     # Implementa la función de evaluación para evaluar el calendario de partidos
     pass
 
-# Definir una función para cruzar dos calendarios
+# Función para cruzar dos calendarios
+#Ejemplo de variable calendario:
+    #calendario = [
+    #    {"jornada": 1, "partidos": [["Equipo1", "Equipo2", "EstadioA"], ["Equipo3", "Equipo4", "EstadioB"]]},
+    #    {"jornada": 2, "partidos": [["Equipo2", "Equipo3", "EstadioC"], ["Equipo4", "Equipo1", "EstadioD"]]}
+    #]
 def cruzar_calendarios(calendario1, calendario2):
-    # Implementa la lógica de cruce entre dos calendarios
-    pass
+    # Crear un calendario vacío 
+    nuevo_calendario = []
+    # Puntos de cruce
+    punto_de_cruce = len(calendario1) // 2
+    # Tomar la primera mitad del calendario1
+    nuevo_calendario.extend(calendario1[:punto_de_cruce])
+    # Tomar la segunda mitad del calendario2
+    nuevo_calendario.extend(calendario2[punto_de_cruce:])
+    return nuevo_calendario
 
 # Definir una función para mutar un calendario
-def mutar_calendario(calendario):
-    # Implementa la lógica de mutación en un calendario
-    pass
+#Recibe un arreglo con el calendario y un valor numérico con la probabilidad de mutación 
+def mutar_calendario(calendario, probabilidad_mutacion):
+    for jornada in calendario:
+        #factor aleatorio que decide si se muta o no
+        if random.random() < probabilidad_mutacion:
+            # Realizar una mutación en la jornada
+            # Por ejemplo, intercambiar dos partidos de lugar en la misma jornada
+            # podríamos meterle otras mutaciones además de estas
+            num_partidos = len(jornada["partidos"])
+            if num_partidos >= 2: #esa condición solo para asegurarse de haber metido una jornada con más de dos partidos
+                idx1, idx2 = random.sample(range(num_partidos), 2) #agarras dos partidos 
+                jornada["partidos"][idx1], jornada["partidos"][idx2] = jornada["partidos"][idx2], jornada["partidos"][idx1]
 
 # Algoritmo evolutivo
 def algoritmo_evolutivo(num_generaciones, tamano_poblacion, tasa_cruce, tasa_mutacion):

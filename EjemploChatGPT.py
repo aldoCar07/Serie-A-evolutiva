@@ -110,12 +110,17 @@ def evaluar_calendario(calendario):
     # queremos evaluar mejor al calendario que menor varianza promedio muestre.
     return -(np.mean(var_jornadas))
 
+
+
 # Función para cruzar dos calendarios
 #Ejemplo de variable calendario:
     calendario = [
         {"jornada": 1, "partidos": [["Equipo1", "Equipo2", "EstadioA"], ["Equipo3", "Equipo4", "EstadioB"]]},
         {"jornada": 2, "partidos": [["Equipo2", "Equipo3", "EstadioC"], ["Equipo4", "Equipo1", "EstadioD"]]}
     ]
+    
+    
+    
 def cruzar_calendarios(calendario1, calendario2):
     # Crear un calendario vacío 
     nuevo_calendario = []
@@ -174,54 +179,5 @@ print("Mejor calendario encontrado:")
 print(mejor_calendario)
 print("Aptitud del mejor calendario:", mejor_aptitud)
 
-#########################
-#ejemplo calendario con equipos y estadios del csv
-calendario = [
-    {
-        "jornada": 1,
-        "partidos": [
-            ["A.C Milan", "Bologna", "Stadio Diego Armando Maradona"],
-            ["Inter de Milan", "Fiorentina", "Mapei Stadium"],
-            ["Roma", "Juventus", "Olimpico di Roma"],
-            ["Lazio", "Verona", "Carlo Castellani"],
-            ["Napoli", "Sassuolo", "Atleti Azzurri d'Italia"],
-            ["Salernitana", "Empoli", "Stadio Via del Mare"],
-            ["Torino", "Atalanta", "Stadio Olimpico Grande Torino"],
-            ["Udinese", "Sassuolo", "Stadio Friuli"],
-            ["Genoa", "Lecce", "Luigi Ferraris"],
-            ["Monza", "Cagliari", "Stadio Brianteo"]
-        ]
-    },
-    {
-        "jornada": 2,
-        "partidos": [
-            ["A.C Milan", "Inter de Milan", "San Siro Stadium"],
-            ["Bologna", "Roma", "Stadio Renato Dall'Ara"],
-            ["Fiorentina", "Lazio", "Artemio Franchi"],
-            ["Juventus", "Napoli", "Allianz Stadium"],
-            ["Verona", "Salernitana", "Marcantonio Bentegodi"],
-            ["Empoli", "Torino", "Stadio Via del Mare"],
-            ["Atalanta", "Udinese", "Atleti Azzurri d'Italia"],
-            ["Sassuolo", "Genoa", "Mapei Stadium"],
-            ["Lecce", "Monza", "Stadio Friuli"],
-            ["Cagliari", "Frosinone", "Unipol Domus"]
-        ]
-    },
-    {
-        "jornada": 3,
-        "partidos": [
-            ["A.C Milan", "Bologna", "Stadio San Siro"],
-            ["Inter de Milan", "Fiorentina", "Stadio Diego Armando Maradona"],
-            ["Roma", "Juventus", "Stadio Olimpico"],
-            ["Lazio", "Verona", "Stadio Bentegodi"],
-            ["Napoli", "Sassuolo", "Carlo Castellani"],
-            ["Salernitana", "Empoli", "Stadio Via del Mare"],
-            ["Torino", "Atalanta", "Stadio Olimpico Grande Torino"],
-            ["Udinese", "Sassuolo", "Stadio Friuli"],
-            ["Genoa", "Lecce", "Stadio Luigi Ferraris"],
-            ["Monza", "Cagliari", "Stadio Brianteo"]
-        ]
-    }
-]
 
 

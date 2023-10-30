@@ -48,9 +48,40 @@ def inicializar_poblacion(num_calendarios):
     return poblacion
 
 # Generar un calendario de partidos aleatorio
-def generar_calendario_aleatorio():
-    # Implementa la lógica para generar un calendario aleatorio
-    pass
+def generar_calendario_aleatorio(equipos):
+    random.shuffle(equipos)
+    
+    if len(equipos) % 2 != 0: #Vemos que tengamos un número de equipos par o asignamos descanso a la lista
+        equipos.append("Descanso")
+
+    n = len(equipos) 
+    mitad = n // 2 # definimos la mitad de los equipos
+
+    jornadas = [] # creamos una lista vacía para ir agregando las jornadas
+    for i in range(n - 1): # iteramos sobre el número de jornadas que se necesitan para que cada equipo juegue contra todos los demás
+        mitad1 = equipos[:mitad] # definimos la primera mitad de los equipos
+        mitad2 = equipos[mitad:] # definimos la segunda mitad de los equipos
+        mitad2.reverse() # invertimos el orden de la segunda mitad para que los equipos no jueguen dos veces seguidas de local o visitante
+
+        emparejamientos = list(zip(mitad1, mitad2)) # creamos una lista de tuplas con los emparejamientos de la jornada
+        jornadas.append(emparejamientos)   # agregamos los emparejamientos a la lista de jornadas
+
+        # rotamos los equipos en el sentido de las manecillas del reloj para que jueguen contra distintos rivales en la siguiente jornada
+        equipos.insert(1, equipos.pop())
+        # mezclamos los equipos para que no se repitan los emparejamientos en las siguientes jornadas
+        # random.shuffle(equipos) no estoy muy segura si es un good addition 
+    return jornadas # regresamos la lista de jornadas
+
+def imprimir_calendario(jornadas): # función para imprimir el calendario
+    for i, jornada in enumerate(jornadas, start=1): # iteramos sobre las jornadas
+        print("\n"+f"Jornada {i}:") # imprimimos el número de jornada
+        for partido in jornada: # iteramos sobre los partidos de la jornada
+            equipo_local, equipo_visitante = partido # un partido es una tupla con dos equipos, aquí los asignamos a dos variables
+            if "Descanso" in partido: # si hay un descanso, imprimimos que hay descanso
+                print(f"Descanso")
+            else: # si no hay descanso, imprimimos el partido
+                print(f"{equipo_local} vs {equipo_visitante}")
+
 
 # Define una función de aptitud para evaluar los calendarios, entre menor sea el valor de aptitud, mejor es el calendario
 def evaluar_calendario(calendario):

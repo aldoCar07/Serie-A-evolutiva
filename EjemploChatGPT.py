@@ -92,23 +92,23 @@ def evaluar_calendario(calendario):
         for partido in jornada['partidos']:
             ciudad_del_estadio = (estadios_df[estadios_df['Stadium'] == partido[2]]).head(1)['City'].values[0] #chorizo para sacar el string de la ciudad en la que se juega un partido de la jornada
             if(ciudad_del_estadio in ciudades): # si la ciudad ya está agregada, habrá al menos dos partidos en la misma ciudad, así que evaluamos con 1
-                return 1
+                return -1000
             else: # si la ciudad no está agregada, la agregamos
                 ciudades.append(ciudad_del_estadio)
                 
     # El siguiente criterio de evaluación es la distancia que hay entre estadios.
     # Procuraremos que la distancia recorrida de los visitantes por jornada sea lo más equitativa posible (minimizando la varianza de las distancias).
-    var_jornadas = []
+    std_jornadas = []
     for jornada in calendario:
         distancias = [] # para cada jornada sacaremos las distancias que recorren los visitantes de cada partido.
         for partido in jornada['partidos']:
             distancia = calcular_distancia(partido[0], partido[1])
             distancias.append(distancia)
-        var_dist_jor = np.var(distancias) # sacamos la varianza del vector de distancias de la jornada
-        var_jornadas.append(var_dist_jor)
+        std_dist_jor = np.std(distancias) # sacamos la varianza del vector de distancias de la jornada
+        std_jornadas.append(std_dist_jor)
         
     # queremos evaluar mejor al calendario que menor varianza promedio muestre.
-    return -(np.mean(var_jornadas))
+    return -(np.mean(std_jornadas))
 
 
 
@@ -178,6 +178,60 @@ mejor_calendario, mejor_aptitud = algoritmo_evolutivo(num_generaciones=100, tama
 print("Mejor calendario encontrado:")
 print(mejor_calendario)
 print("Aptitud del mejor calendario:", mejor_aptitud)
+
+#################33
+#####################3
+#######################3
+#######################33
+#CALENDARIO DE PRUEBA CON ESTADIOS REALES
+calendario = [
+    {
+        "jornada": 1,
+        "partidos": [
+            ["A.C Milan", "Inter de Milan", "San Siro Stadium"],
+            ["Roma", "Lazio", "Olimpico di Roma"],
+            ["Napoli", "Fiorentina", "Stadio Diego Armando Maradona"],
+            ["Juventus", "Verona", "Allianz Stadium"],
+            ["Bologna", "Genoa", "Stadio Renato Dall'Ara"],
+            ["Lecce", "Salernitana", "Arechi"],
+            ["Udinese", "Torino", "Stadio Friuli"],
+            ["Atalanta", "Sassuolo", "Atleti Azzurri d'Italia"],
+            ["Empoli", "Monza", "Carlo Castellani"],
+            ["Cagliari", "Frosinone", "Unipol Domus"]
+        ]
+    },
+    {
+        "jornada": 2,
+        "partidos": [
+            ["A.C Milan", "Roma", "Stadio Diego Armando Maradona"],
+            ["Inter de Milan", "Lazio", "Artemio Franchi"],
+            ["Napoli", "Juventus", "Allianz Stadium"],
+            ["Fiorentina", "Verona", "Marcantonio Bentegodi"],
+            ["Bologna", "Genoa", "Luigi Ferraris"],
+            ["Lecce", "Salernitana", "Stadio Via del Mare"],
+            ["Udinese", "Torino", "Stadio Friuli"],
+            ["Atalanta", "Sassuolo", "Mapei Stadium"],
+            ["Empoli", "Monza", "Stadio Brianteo"],
+            ["Cagliari", "Frosinone", "Benito Stirpe"]
+        ]
+    },
+    {
+        "jornada": 3,
+        "partidos": [
+            ["A.C Milan", "Napoli", "San Siro Stadium"],
+            ["Inter de Milan", "Fiorentina", "Olimpico di Roma"],
+            ["Roma", "Juventus", "Stadio Diego Armando Maradona"],
+            ["Lazio", "Verona", "Allianz Stadium"],
+            ["Bologna", "Genoa", "Stadio Renato Dall'Ara"],
+            ["Lecce", "Salernitana", "Arechi"],
+            ["Udinese", "Torino", "Stadio Friuli"],
+            ["Atalanta", "Sassuolo", "Atleti Azzurri d'Italia"],
+            ["Empoli", "Monza", "Carlo Castellani"],
+            ["Cagliari", "Frosinone", "Unipol Domus"]
+        ]
+    }
+]
+
 
 
 

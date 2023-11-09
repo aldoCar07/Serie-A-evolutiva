@@ -164,7 +164,7 @@ def algoritmo_evolutivo(num_generaciones, tamano_poblacion, tasa_cruce, tasa_mut
         while len(nueva_generacion) < tamano_poblacion:
             padre1, padre2 = random.sample(mejores_calendarios, 2)
             hijo = cruzar_calendarios(padre1, padre2)
-            hijo = mutar_calendario(hijo)
+            hijo = mutar_calendario(hijo, tasa_mutacion)
             nueva_generacion.append(hijo)
 
         poblacion = nueva_generacion

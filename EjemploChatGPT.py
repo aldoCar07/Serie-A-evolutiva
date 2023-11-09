@@ -156,7 +156,7 @@ def algoritmo_evolutivo(num_generaciones, tamano_poblacion, tasa_cruce, tasa_mut
 
         # Seleccionar a los mejores calendarios
         poblacion_evaluada.sort(key=lambda x: x[1], reverse=False)
-        mejores_calendarios = [cal[0] for cal in poblacion_evaluada[:int(tamano_poblacion * 0.2)]]
+        mejores_calendarios = [cal[0] for cal in poblacion_evaluada[:int(tamano_poblacion * 0.2)]] #elegir el mejor 20% de los calendarios
 
         nueva_generacion = []
 
@@ -170,7 +170,9 @@ def algoritmo_evolutivo(num_generaciones, tamano_poblacion, tasa_cruce, tasa_mut
         poblacion = nueva_generacion
 
     # Devolver el mejor calendario encontrado
+    poblacion_evaluada = [(calendario, evaluar_calendario(calendario)) for calendario in poblacion]
     mejor_calendario, mejor_aptitud = max(poblacion_evaluada, key=lambda x: x[1])
+    
     return mejor_calendario, mejor_aptitud
 
 # Ejecutar el algoritmo evolutivo

@@ -47,30 +47,41 @@ def inicializar_poblacion(num_calendarios):
         poblacion.append(calendario)
     return poblacion
 
+# Ejemplo de variables que se utilizan
+#equipos = ['Equipo1', 'Equipo2', 'Equipo3', 'Equipo4']
+#estadios = [
+#    {"nombre": "EstadioA", "ciudad": "Ciudad1"},
+#    {"nombre": "EstadioB", "ciudad": "Ciudad1"},
+#    {"nombre": "EstadioC", "ciudad": "Ciudad2"},
+#    {"nombre": "EstadioD", "ciudad": "Ciudad2"}
+#]
+
 # Generar un calendario de partidos aleatorio
-def generar_calendario_aleatorio(equipos):
-    random.shuffle(equipos)
-    
-    if len(equipos) % 2 != 0: #Vemos que tengamos un número de equipos par o asignamos descanso a la lista
-        equipos.append("Descanso")
+def generar_calendario_aleatorio(equipos, estadios):
+    # Asegura que haya dos equipos en cada estadio
+    estadios_por_ciudad = {estadio["ciudad"]: [] for estadio in estadios}
+    for equipo in equipos:
+        ciudad_equipo = random.choice(list(estadios_por_ciudad.keys()))
+        estadios_por_ciudad[ciudad_equipo].append(equipo)
 
-    n = len(equipos) 
-    mitad = n // 2 # definimos la mitad de los equipos
+    # Genera el calendario por jornadas
+    calendario = []
+    num_jornadas = len(equipos) - 1  # Una jornada por cada equipo excepto el último
 
-    jornadas = [] # creamos una lista vacía para ir agregando las jornadas
-    for i in range(n - 1): # iteramos sobre el número de jornadas que se necesitan para que cada equipo juegue contra todos los demás
-        mitad1 = equipos[:mitad] # definimos la primera mitad de los equipos
-        mitad2 = equipos[mitad:] # definimos la segunda mitad de los equipos
-        mitad2.reverse() # invertimos el orden de la segunda mitad para que los equipos no jueguen dos veces seguidas de local o visitante
+    for jornada in range(1, num_jornadas + 1):
+        partidos_jornada = []
 
-        emparejamientos = list(zip(mitad1, mitad2)) # creamos una lista de tuplas con los emparejamientos de la jornada
-        jornadas.append(emparejamientos)   # agregamos los emparejamientos a la lista de jornadas
+        for ciudad, equipos_ciudad in estadios_por_ciudad.items():
+            # Asegura que haya al menos dos equipos en la ciudad para generar un partido
+            if len(equipos_ciudad) >= 2:
+                partido = random.sample(equipos_ciudad, 2)
+                estadio = random.choice(estadios)
+                partidos_jornada.append([partido[0], partido[1], estadio["nombre"]])
 
-        # rotamos los equipos en el sentido de las manecillas del reloj para que jueguen contra distintos rivales en la siguiente jornada
-        equipos.insert(1, equipos.pop())
-        # mezclamos los equipos para que no se repitan los emparejamientos en las siguientes jornadas
-        # random.shuffle(equipos) no estoy muy segura si es un good addition 
-    return jornadas # regresamos la lista de jornadas
+        # Añade los partidos de esta jornada al calendario
+        calendario.append({"jornada": jornada, "partidos": partidos_jornada})
+
+    return calendario
 
 def imprimir_calendario(jornadas): # función para imprimir el calendario
     for i, jornada in enumerate(jornadas, start=1): # iteramos sobre las jornadas

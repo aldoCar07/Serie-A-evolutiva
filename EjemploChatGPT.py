@@ -47,30 +47,41 @@ def inicializar_poblacion(num_calendarios):
         poblacion.append(calendario)
     return poblacion
 
+# Ejemplo de variables que se utilizan
+#equipos = ['Equipo1', 'Equipo2', 'Equipo3', 'Equipo4']
+#estadios = [
+#    {"nombre": "EstadioA", "ciudad": "Ciudad1"},
+#    {"nombre": "EstadioB", "ciudad": "Ciudad1"},
+#    {"nombre": "EstadioC", "ciudad": "Ciudad2"},
+#    {"nombre": "EstadioD", "ciudad": "Ciudad2"}
+#]
+
 # Generar un calendario de partidos aleatorio
-def generar_calendario_aleatorio(equipos):
-    random.shuffle(equipos)
-    
-    if len(equipos) % 2 != 0: #Vemos que tengamos un número de equipos par o asignamos descanso a la lista
-        equipos.append("Descanso")
+def generar_calendario_aleatorio(equipos, estadios):
+    # Asegura que haya dos equipos en cada estadio
+    estadios_por_ciudad = {estadio["ciudad"]: [] for estadio in estadios}
+    for equipo in equipos:
+        ciudad_equipo = random.choice(list(estadios_por_ciudad.keys()))
+        estadios_por_ciudad[ciudad_equipo].append(equipo)
 
-    n = len(equipos) 
-    mitad = n // 2 # definimos la mitad de los equipos
+    # Genera el calendario por jornadas
+    calendario = []
+    num_jornadas = len(equipos) - 1  # Una jornada por cada equipo excepto el último
 
-    jornadas = [] # creamos una lista vacía para ir agregando las jornadas
-    for i in range(n - 1): # iteramos sobre el número de jornadas que se necesitan para que cada equipo juegue contra todos los demás
-        mitad1 = equipos[:mitad] # definimos la primera mitad de los equipos
-        mitad2 = equipos[mitad:] # definimos la segunda mitad de los equipos
-        mitad2.reverse() # invertimos el orden de la segunda mitad para que los equipos no jueguen dos veces seguidas de local o visitante
+    for jornada in range(1, num_jornadas + 1):
+        partidos_jornada = []
 
-        emparejamientos = list(zip(mitad1, mitad2)) # creamos una lista de tuplas con los emparejamientos de la jornada
-        jornadas.append(emparejamientos)   # agregamos los emparejamientos a la lista de jornadas
+        for ciudad, equipos_ciudad in estadios_por_ciudad.items():
+            # Asegura que haya al menos dos equipos en la ciudad para generar un partido
+            if len(equipos_ciudad) >= 2:
+                partido = random.sample(equipos_ciudad, 2)
+                estadio = random.choice(estadios)
+                partidos_jornada.append([partido[0], partido[1], estadio["nombre"]])
 
-        # rotamos los equipos en el sentido de las manecillas del reloj para que jueguen contra distintos rivales en la siguiente jornada
-        equipos.insert(1, equipos.pop())
-        # mezclamos los equipos para que no se repitan los emparejamientos en las siguientes jornadas
-        # random.shuffle(equipos) no estoy muy segura si es un good addition 
-    return jornadas # regresamos la lista de jornadas
+        # Añade los partidos de esta jornada al calendario
+        calendario.append({"jornada": jornada, "partidos": partidos_jornada})
+
+    return calendario
 
 def imprimir_calendario(jornadas): # función para imprimir el calendario
     for i, jornada in enumerate(jornadas, start=1): # iteramos sobre las jornadas
@@ -92,23 +103,23 @@ def evaluar_calendario(calendario):
         for partido in jornada['partidos']:
             ciudad_del_estadio = (estadios_df[estadios_df['Stadium'] == partido[2]]).head(1)['City'].values[0] #chorizo para sacar el string de la ciudad en la que se juega un partido de la jornada
             if(ciudad_del_estadio in ciudades): # si la ciudad ya está agregada, habrá al menos dos partidos en la misma ciudad, así que evaluamos con 1
-                return 1
+                return -1000
             else: # si la ciudad no está agregada, la agregamos
                 ciudades.append(ciudad_del_estadio)
                 
     # El siguiente criterio de evaluación es la distancia que hay entre estadios.
     # Procuraremos que la distancia recorrida de los visitantes por jornada sea lo más equitativa posible (minimizando la varianza de las distancias).
-    var_jornadas = []
+    std_jornadas = []
     for jornada in calendario:
         distancias = [] # para cada jornada sacaremos las distancias que recorren los visitantes de cada partido.
         for partido in jornada['partidos']:
             distancia = calcular_distancia(partido[0], partido[1])
             distancias.append(distancia)
-        var_dist_jor = np.var(distancias) # sacamos la varianza del vector de distancias de la jornada
-        var_jornadas.append(var_dist_jor)
+        std_dist_jor = np.std(distancias) # sacamos la varianza del vector de distancias de la jornada
+        std_jornadas.append(std_dist_jor)
         
     # queremos evaluar mejor al calendario que menor varianza promedio muestre.
-    return -(np.mean(var_jornadas))
+    return -(np.mean(std_jornadas))
 
 
 
@@ -156,7 +167,7 @@ def algoritmo_evolutivo(num_generaciones, tamano_poblacion, tasa_cruce, tasa_mut
 
         # Seleccionar a los mejores calendarios
         poblacion_evaluada.sort(key=lambda x: x[1], reverse=False)
-        mejores_calendarios = [cal[0] for cal in poblacion_evaluada[:int(tamano_poblacion * 0.2)]]
+        mejores_calendarios = [cal[0] for cal in poblacion_evaluada[:int(tamano_poblacion * 0.2)]] #elegir el mejor 20% de los calendarios
 
         nueva_generacion = []
 
@@ -164,13 +175,15 @@ def algoritmo_evolutivo(num_generaciones, tamano_poblacion, tasa_cruce, tasa_mut
         while len(nueva_generacion) < tamano_poblacion:
             padre1, padre2 = random.sample(mejores_calendarios, 2)
             hijo = cruzar_calendarios(padre1, padre2)
-            hijo = mutar_calendario(hijo)
+            hijo = mutar_calendario(hijo, tasa_mutacion)
             nueva_generacion.append(hijo)
 
         poblacion = nueva_generacion
 
     # Devolver el mejor calendario encontrado
+    poblacion_evaluada = [(calendario, evaluar_calendario(calendario)) for calendario in poblacion]
     mejor_calendario, mejor_aptitud = max(poblacion_evaluada, key=lambda x: x[1])
+    
     return mejor_calendario, mejor_aptitud
 
 # Ejecutar el algoritmo evolutivo
@@ -178,6 +191,60 @@ mejor_calendario, mejor_aptitud = algoritmo_evolutivo(num_generaciones=100, tama
 print("Mejor calendario encontrado:")
 print(mejor_calendario)
 print("Aptitud del mejor calendario:", mejor_aptitud)
+
+#################33
+#####################3
+#######################3
+#######################33
+#CALENDARIO DE PRUEBA CON ESTADIOS REALES
+calendario = [
+    {
+        "jornada": 1,
+        "partidos": [
+            ["A.C Milan", "Inter de Milan", "San Siro Stadium"],
+            ["Roma", "Lazio", "Olimpico di Roma"],
+            ["Napoli", "Fiorentina", "Stadio Diego Armando Maradona"],
+            ["Juventus", "Verona", "Allianz Stadium"],
+            ["Bologna", "Genoa", "Stadio Renato Dall'Ara"],
+            ["Lecce", "Salernitana", "Arechi"],
+            ["Udinese", "Torino", "Stadio Friuli"],
+            ["Atalanta", "Sassuolo", "Atleti Azzurri d'Italia"],
+            ["Empoli", "Monza", "Carlo Castellani"],
+            ["Cagliari", "Frosinone", "Unipol Domus"]
+        ]
+    },
+    {
+        "jornada": 2,
+        "partidos": [
+            ["A.C Milan", "Roma", "Stadio Diego Armando Maradona"],
+            ["Inter de Milan", "Lazio", "Artemio Franchi"],
+            ["Napoli", "Juventus", "Allianz Stadium"],
+            ["Fiorentina", "Verona", "Marcantonio Bentegodi"],
+            ["Bologna", "Genoa", "Luigi Ferraris"],
+            ["Lecce", "Salernitana", "Stadio Via del Mare"],
+            ["Udinese", "Torino", "Stadio Friuli"],
+            ["Atalanta", "Sassuolo", "Mapei Stadium"],
+            ["Empoli", "Monza", "Stadio Brianteo"],
+            ["Cagliari", "Frosinone", "Benito Stirpe"]
+        ]
+    },
+    {
+        "jornada": 3,
+        "partidos": [
+            ["A.C Milan", "Napoli", "San Siro Stadium"],
+            ["Inter de Milan", "Fiorentina", "Olimpico di Roma"],
+            ["Roma", "Juventus", "Stadio Diego Armando Maradona"],
+            ["Lazio", "Verona", "Allianz Stadium"],
+            ["Bologna", "Genoa", "Stadio Renato Dall'Ara"],
+            ["Lecce", "Salernitana", "Arechi"],
+            ["Udinese", "Torino", "Stadio Friuli"],
+            ["Atalanta", "Sassuolo", "Atleti Azzurri d'Italia"],
+            ["Empoli", "Monza", "Carlo Castellani"],
+            ["Cagliari", "Frosinone", "Unipol Domus"]
+        ]
+    }
+]
+
 
 
 

@@ -60,11 +60,21 @@ def calcular_distancia(equipo1, equipo2):
     return distancia
 
 # Inicialización de la población
-def inicializar_poblacion(num_calendarios):
+def inicializar_poblacion(num_calendarios, estadios_df):
     poblacion = []
     for _ in range(num_calendarios):
         # Genera un calendario aleatorio
-        calendario = generar_calendario_aleatorio()
+        selected_columns = ['Team', 'City', 'Stadium']
+        df_aux = estadios_df[selected_columns]
+        jornadas_generadas = generar_jornadas(df_aux)
+        df_copia = jornadas_generadas.copy()
+        jornadas_generadas2=jornadas_vuelta(df_copia,df_aux)
+        # Concatena ida y vuelta
+        result_vertical = pd.concat([jornadas_generadas, jornadas_generadas2], axis=0)
+        # Resetea el indice
+        df_final = result_vertical.reset_index(drop=True)
+        # cambia de dataframe a lista de diccionarios
+        calendario = transformador(df_final)
         poblacion.append(calendario)
     return poblacion
 
@@ -217,8 +227,8 @@ def mutar_calendario(calendario, probabilidad_mutacion):
                 jornada["partidos"][idx1], jornada["partidos"][idx2] = jornada["partidos"][idx2], jornada["partidos"][idx1]
 
 # Algoritmo evolutivo
-def algoritmo_evolutivo(num_generaciones, tamano_poblacion, tasa_cruce, tasa_mutacion):
-    poblacion = inicializar_poblacion(tamano_poblacion)
+def algoritmo_evolutivo(estadios_df,num_generaciones, tamano_poblacion, tasa_cruce, tasa_mutacion):
+    poblacion = inicializar_poblacion(tamano_poblacion, estadios_df)
 
     for generacion in range(num_generaciones):
         # Evaluar la aptitud de la población actual
@@ -245,11 +255,17 @@ def algoritmo_evolutivo(num_generaciones, tamano_poblacion, tasa_cruce, tasa_mut
     
     return mejor_calendario, mejor_aptitud
 
+#PRUEBAS
+#prueba de inicializar población
+print(inicializar_poblacion(1,estadios_df))
+
 # Ejecutar el algoritmo evolutivo
-mejor_calendario, mejor_aptitud = algoritmo_evolutivo(num_generaciones=100, tamano_poblacion=50, tasa_cruce=0.8, tasa_mutacion=0.1)
-print("Mejor calendario encontrado:")
-print(mejor_calendario)
-print("Aptitud del mejor calendario:", mejor_aptitud)
+#mejor_calendario, mejor_aptitud = algoritmo_evolutivo(estadios_df, num_generaciones=100, tamano_poblacion=50, tasa_cruce=0.8, tasa_mutacion=0.1)
+#print("Mejor calendario encontrado:")
+#print(mejor_calendario)
+#print("Aptitud del mejor calendario:", mejor_aptitud)
+
+
 
 #################33
 #####################3
@@ -303,6 +319,10 @@ calendario = [
         ]
     }
 ]
+
+
+
+
 
 
 

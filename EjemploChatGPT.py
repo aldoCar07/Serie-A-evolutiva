@@ -9,22 +9,43 @@ import random
 import math
 import numpy as np
 
-# Cargar datos de estadios y equipos desde el archivo CSV
-estadios_df = pd.read_csv("estadios.csv")
+# Creamos dataframe de estadios desde cero
+data = {
+    'Team': ['A.C Milan', 'Inter de Milan', 'Roma', 'Lazio', 'Napoli', 'Fiorentina', 'Juventus', 'Verona', 'Bologna',
+             'Genoa', 'Lecce', 'Salernitana', 'Torino', 'Udinese', 'Atalanta', 'Sassuolo', 'Empoli', 'Monza', 'Cagliari',
+             'Frosinone'],
+    'City': ['Milan', 'Milan', 'Roma', 'Roma', 'Napoli', 'Firenze', 'Torino', 'Verona', 'Bologna', 'Genova', 'Lecce',
+             'Salerno', 'Torino', 'Udine', 'Bergamo', 'Reggio Emilia', 'Empoli', 'Monza', 'Cagliari', 'Frosinone'],
+    'Stadium': [
+        'San Siro Stadium', 'San Siro Stadium', 'Olimpico di Roma', 'Olimpico di Roma',
+        'Stadio Diego Armando Maradona', 'Artemio Franchi', 'Allianz Stadium', 'Marcantonio Bentegodi',
+        "Stadio Renato Dall'Ara", 'Luigi Ferraris', 'Stadio Via del Mare', 'Arechi',
+        'Stadio Olimpico Grande Torino', 'Stadio Friuli', "Atleti Azzurri d'Italia", 'Mapei Stadium', 'Carlo Castellani',
+        'Stadio Brianteo', 'Unipol Domus', 'Benito Stirpe'
+    ],
+    'Latitude': [45.478489, 45.478489, 41.933964, 41.933964, 40.827967, 43.7751569, 45.10566624, 45.43454493,
+                 44.48871971, 44.40985669, 40.35916523, 40.64033077, 45.03838318, 46.07562803, 45.70533051, 44.7088305,
+                 43.72249711, 45.57633103, 39.1998673, 41.633987],
+    'Longitude': [9.12215, 9.12215, 12.454297, 12.454297, 14.193008, 11.27602056, 7.637997448, 10.96785113,
+                  11.30579878, 8.951452861, 18.20533251, 14.82099672, 7.650005733, 13.20008087, 9.675163966, 10.64316409,
+                  10.95299619, 9.304832114, 9.1383365, 13.322092]
+}
+estadios_df = pd.DataFrame(data) #este es el dataframe con toda la información
 
 # Función para calcular la distancia entre dos estadios (puedes usar la distancia Euclidiana)
 def calcular_distancia(equipo1, equipo2):
     radio_tierra_km = 6371.0
+   
     # Convertir latitudes y longitudes de grados a radianes
-    #falta referenciar por equipo
     latitud1, longitud1= estadios_df[estadios_df['Team'] == equipo1][['Latitude', 'Longitude']].values[0]
     latitud2, longitud2= estadios_df[estadios_df['Team'] == equipo2][['Latitude', 'Longitude']].values[0]
-    
+   
+    #Convertimos a radianes porqué así va la formula
     latitud1 = math.radians(latitud1)
     longitud1 = math.radians(longitud1)
     latitud2 = math.radians(latitud2)
     longitud2 = math.radians(longitud2)
-    
+
     # Diferencia entre las latitudes y longitudes
     diferencia_latitud = latitud2 - latitud1
     diferencia_longitud = longitud2 - longitud1
@@ -47,41 +68,87 @@ def inicializar_poblacion(num_calendarios):
         poblacion.append(calendario)
     return poblacion
 
-# Ejemplo de variables que se utilizan
-#equipos = ['Equipo1', 'Equipo2', 'Equipo3', 'Equipo4']
-#estadios = [
-#    {"nombre": "EstadioA", "ciudad": "Ciudad1"},
-#    {"nombre": "EstadioB", "ciudad": "Ciudad1"},
-#    {"nombre": "EstadioC", "ciudad": "Ciudad2"},
-#    {"nombre": "EstadioD", "ciudad": "Ciudad2"}
-#]
+# Generar jornadas de partidos de ida
+#Nota: Usar un dataframe auxiliar cómo se muestra a continuación, NO el original
+# selected_columns = ['Team', 'City', 'Stadium']
+#df_aux = df[selected_columns]
+#generar_jornadas(df_aux)
+def generar_jornadas(dataframe):
+    # Crear una copia del DataFrame para trabajar con ella
+    df = dataframe.copy()
 
-# Generar un calendario de partidos aleatorio
-def generar_calendario_aleatorio(equipos, estadios):
-    # Asegura que haya dos equipos en cada estadio
-    estadios_por_ciudad = {estadio["ciudad"]: [] for estadio in estadios}
-    for equipo in equipos:
-        ciudad_equipo = random.choice(list(estadios_por_ciudad.keys()))
-        estadios_por_ciudad[ciudad_equipo].append(equipo)
+    # Crear un DataFrame para almacenar las jornadas
+    jornadas = pd.DataFrame(columns=['Jornada', 'Equipo Local', 'Equipo Visitante', 'Estadio'])
 
-    # Genera el calendario por jornadas
-    calendario = []
-    num_jornadas = len(equipos) - 1  # Una jornada por cada equipo excepto el último
+    estadios = list(df['Stadium'])
+    
+    # Iterar a través de las jornadas #ponerle 20 para que salgan 19 jornadas
+    for jornada in range(1, 20):
+        # Barajar los equipos
+        df = df.sample(frac=1)
 
-    for jornada in range(1, num_jornadas + 1):
-        partidos_jornada = []
+        # Iterar a través de los partidos de la jornada
+        for i in range(0, 20, 2):
+            equipo_local = df.iloc[i]['Team']
+            equipo_visitante = df.iloc[i + 1]['Team']
+            
+            estadio=''#esto solo es para ponerlo en vacio
+            
+            new_row={'Jornada': jornada, 'Equipo Local': equipo_local, 'Equipo Visitante': equipo_visitante, 'Estadio': estadio}
 
-        for ciudad, equipos_ciudad in estadios_por_ciudad.items():
-            # Asegura que haya al menos dos equipos en la ciudad para generar un partido
-            if len(equipos_ciudad) >= 2:
-                partido = random.sample(equipos_ciudad, 2)
-                estadio = random.choice(estadios)
-                partidos_jornada.append([partido[0], partido[1], estadio["nombre"]])
+            jornadas = pd.concat([jornadas, pd.DataFrame([new_row])], ignore_index=True)
+            
+        # Este for itera sobre cada fila del dataframe y le pone el nombre del estadio del equipo local
+    for index, row in jornadas.iterrows():
+        target_name = row['Equipo Local']
+        nuevo_estadio = df.loc[df['Team'] == target_name, 'Stadium'].values[0]
+        jornadas.at[index,'Estadio']=nuevo_estadio
 
-        # Añade los partidos de esta jornada al calendario
-        calendario.append({"jornada": jornada, "partidos": partidos_jornada})
+    return jornadas
 
-    return calendario
+#Generar jornadas de partidos de vuelta
+#Nota: Importante usar una COPIA del método anterior cómo primer parámetro
+# Ejemplo: jornadas_generadas= generar_jornadas(estadios_df)
+# df_copia = jornadas_generadas.copy()
+# jornadas_generadas2= jornadas_vuelta(df_copia, df_aux)
+def jornadas_vuelta(df,df_original):
+    #aquí volteas los valores de local y visitante del dataframe anterior
+    temp_values = df['Equipo Local'].copy() 
+    df['Equipo Local'] = df['Equipo Visitante'] 
+    df['Equipo Visitante'] = temp_values
+    
+    # Itera sobre cada fila del dataframe
+    for index, row in df.iterrows():
+        target_name = row['Equipo Local']
+        nuevo_estadio = df_original.loc[df_original['Team'] == target_name, 'Stadium'].values[0]
+        df.at[index,'Estadio']=nuevo_estadio
+        
+        new_jornada=row['Jornada']+19
+        df.at[index,'Jornada']=new_jornada
+    
+    return df
+
+#a estos método de ida y vuelta faltan los auxiliares que concatenan y resetean el indice
+# Concatena ida y vuelta
+#result_vertical = pd.concat([jornadas_generadas, jornadas_generadas2], axis=0)
+# Resetea el indice
+#df_final = result_vertical.reset_index(drop=True)
+#df_final es el dataframe con las 2 jornadas pegadas
+
+#este método pasa de dataframe a una lista de diccionarios
+def transformador(df):
+    calendario_transformed = []
+
+    for jornada, group in df.groupby('Jornada'):
+        partidos = []
+        for _, row in group.iterrows():
+            partido = [row['Equipo Local'], row['Equipo Visitante'], row['Estadio']]
+            partidos.append(partido)
+
+        jornada_dict = {'jornada': jornada, 'partidos': partidos}
+        calendario_transformed.append(jornada_dict)
+
+    return calendario_transformed 
 
 def imprimir_calendario(jornadas): # función para imprimir el calendario
     for i, jornada in enumerate(jornadas, start=1): # iteramos sobre las jornadas
@@ -123,15 +190,7 @@ def evaluar_calendario(calendario):
 
 
 
-# Función para cruzar dos calendarios
-#Ejemplo de variable calendario:
-    calendario = [
-        {"jornada": 1, "partidos": [["Equipo1", "Equipo2", "EstadioA"], ["Equipo3", "Equipo4", "EstadioB"]]},
-        {"jornada": 2, "partidos": [["Equipo2", "Equipo3", "EstadioC"], ["Equipo4", "Equipo1", "EstadioD"]]}
-    ]
-    
-    
-    
+# Función para cruzar dos calendarios    
 def cruzar_calendarios(calendario1, calendario2):
     # Crear un calendario vacío 
     nuevo_calendario = []

@@ -175,14 +175,17 @@ def imprimir_calendario(jornadas): # función para imprimir el calendario
 def evaluar_calendario(calendario):
     # Implementa la función de evaluación para evaluar el calendario de partidos
     # Vamos a evaluar de forma negativa si hay dos partidos en la misma ciudad en la misma jornada
+    rep_city_in_calendario = 0
     for jornada in calendario:  #para cada jornada del calendario se hará la evaluación
         ciudades = [] #agregamos las ciudades en las que se juegan los partidos de la jornada (al final debería haber 10 distintos)
+        rep_city = 0
         for partido in jornada['partidos']:
             ciudad_del_estadio = (estadios_df[estadios_df['Stadium'] == partido[2]]).head(1)['City'].values[0] #chorizo para sacar el string de la ciudad en la que se juega un partido de la jornada
-            if(ciudad_del_estadio in ciudades): # si la ciudad ya está agregada, habrá al menos dos partidos en la misma ciudad, así que evaluamos con 1
-                return -1000
+            if(ciudad_del_estadio in ciudades): # si la ciudad ya está agregada, habrá al menos dos partidos en la misma ciudad, así que evaluamos con 
+                rep_city = rep_city + 1
             else: # si la ciudad no está agregada, la agregamos
                 ciudades.append(ciudad_del_estadio)
+        rep_city_in_calendario = rep_city_in_calendario + rep_city
                 
     # El siguiente criterio de evaluación es la distancia que hay entre estadios.
     # Procuraremos que la distancia recorrida de los visitantes por jornada sea lo más equitativa posible (minimizando la varianza de las distancias).
@@ -196,7 +199,7 @@ def evaluar_calendario(calendario):
         std_jornadas.append(std_dist_jor)
         
     # queremos evaluar mejor al calendario que menor varianza promedio muestre.
-    return -(np.mean(std_jornadas))
+    return -(np.mean(std_jornadas) + rep_city_in_calendario*np.mean(std_jornadas))
 
 
 
@@ -225,17 +228,22 @@ def mutar_calendario(calendario, probabilidad_mutacion):
             if num_partidos >= 2: #esa condición solo para asegurarse de haber metido una jornada con más de dos partidos
                 idx1, idx2 = random.sample(range(num_partidos), 2) #agarras dos partidos 
                 jornada["partidos"][idx1], jornada["partidos"][idx2] = jornada["partidos"][idx2], jornada["partidos"][idx1]
+    
+    return calendario
 
 # Algoritmo evolutivo
-def algoritmo_evolutivo(estadios_df,num_generaciones, tamano_poblacion, tasa_cruce, tasa_mutacion):
+def algoritmo_evolutivo(estadios_df,num_generaciones, tamano_poblacion, tasa_mutacion):
     poblacion = inicializar_poblacion(tamano_poblacion, estadios_df)
 
     for generacion in range(num_generaciones):
+        poblacion_evaluada = []
         # Evaluar la aptitud de la población actual
-        poblacion_evaluada = [(calendario, evaluar_calendario(calendario)) for calendario in poblacion]
+        for calendario in poblacion:
+            poblacion_evaluada.append((calendario, evaluar_calendario(calendario)))
+        
 
         # Seleccionar a los mejores calendarios
-        poblacion_evaluada.sort(key=lambda x: x[1], reverse=False)
+        poblacion_evaluada.sort(key=lambda x: x[1], reverse=True)
         mejores_calendarios = [cal[0] for cal in poblacion_evaluada[:int(tamano_poblacion * 0.2)]] #elegir el mejor 20% de los calendarios
 
         nueva_generacion = []

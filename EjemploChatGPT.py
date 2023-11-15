@@ -9,7 +9,7 @@ import random
 import math
 import numpy as np
 
-# Creamos dataframe de estadios desde cero
+# Creamos dataframe de estadios desde cero para no necesitar del csv
 data = {
     'Team': ['A.C Milan', 'Inter de Milan', 'Roma', 'Lazio', 'Napoli', 'Fiorentina', 'Juventus', 'Verona', 'Bologna',
              'Genoa', 'Lecce', 'Salernitana', 'Torino', 'Udinese', 'Atalanta', 'Sassuolo', 'Empoli', 'Monza', 'Cagliari',
@@ -40,7 +40,7 @@ def calcular_distancia(equipo1, equipo2):
     latitud1, longitud1= estadios_df[estadios_df['Team'] == equipo1][['Latitude', 'Longitude']].values[0]
     latitud2, longitud2= estadios_df[estadios_df['Team'] == equipo2][['Latitude', 'Longitude']].values[0]
    
-    #Convertimos a radianes porqué así va la formula
+    #Convertimos a radianes porque así va la formula
     latitud1 = math.radians(latitud1)
     longitud1 = math.radians(longitud1)
     latitud2 = math.radians(latitud2)
